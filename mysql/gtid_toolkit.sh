@@ -9,9 +9,6 @@
 # Version      People   Date             Notes
 # V1.0.0       zhangl   2021-12-28      create this script
 #-----------------------------------------------------------------------------------------------------------
-
-DESCRIPTION="Exit 0 if node1 can auto-position on node2."
-
 set -eu
 
 db_user=''
@@ -41,8 +38,9 @@ log() {
 init_conn(){
   # 根据数据库IP地址，创建连接
   local host="$1"
-  mysql -u "$db_user"
-
+  local sql="$2"
+  mysql -h"$host" -u "$db_user" -p"$db_passwd" -NBe "$sql"
+  return 1
 }
 
 find_master(){
