@@ -2,21 +2,27 @@
 #---------------------------------------------------- Head info -------------------------------------------
 # author          : zhangl (blylei@163.com)
 # create datetime : 2021-12-28
-# funcation       : 查找缺失的gtid
-# script name     : find_missing_gtid.sh
+# funcation       : fix MySQL【Oracle's or Percona】 gtid issue
+# script name     : gtid_toolkit.sh
 #-----------------------------------------------------------------------------------------------------------
 #-------------------------------------------------- Modified logs ------------------------------------------
 # Version      People   Date             Notes
-# V1.0.0       zhangl   2021-12-28      新增脚本
+# V1.0.0       zhangl   2021-12-28      create this script
 #-----------------------------------------------------------------------------------------------------------
 
 DESCRIPTION="Exit 0 if node1 can auto-position on node2."
 
 set -eu
 
+db_user=''
+db_passwd=''
+db_port=3306
+
+
 
 ## inject-empty
 ## reset-master
+## desc-topo
 
 usage() {
   echo "usage: $0 [options] node1 node2"
@@ -27,6 +33,13 @@ usage() {
 }
 
 ENABLE_AUTO_POS=""
+
+conn_init(){
+  # 根据数据库IP地址，创建连接
+  local host="$1"
+  mysql -u "$db_user"
+
+}
 
 while getopts "a" opt; do
   case "$opt" in
