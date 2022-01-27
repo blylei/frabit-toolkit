@@ -13,4 +13,19 @@
   ```bash
   bash ./install.sh
   ```
-
+- 3、探测当前集群的拓扑结构
+  ```bash
+  gtid_toolkit -c desc_topo -i 192.168.100.48
+  ```
+  
+- 4、修复gtid异常的集群
+  
+  - 注入空事务
+    ```bash
+      gtid_toolkit -c desc_topo -i 192.168.100.48
+    ```
+    
+  - 重置从库gtid值
+    ```bash
+      gtid_toolkit -c reset_master -i 192.168.100.48
+    ```
