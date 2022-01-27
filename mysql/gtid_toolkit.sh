@@ -18,7 +18,7 @@ db_user=''
 db_passwd=''
 db_port=3306
 
-
+error_file=/tmp/gtid_toolkit.log
 
 ## inject-empty
 ## reset-master
@@ -32,21 +32,58 @@ usage() {
   exit $1
 }
 
-ENABLE_AUTO_POS=""
+log() {
+  # 将操作日志格式化以后登记到日志文件内
+  dt_flg=$(date +'%F %T')
+  echo "$dt_flg $1" >>${error_file}
+}
 
-conn_init(){
+init_conn(){
   # 根据数据库IP地址，创建连接
   local host="$1"
   mysql -u "$db_user"
 
 }
 
+find_master(){
+  # 根据提供的数据库IP地址，找到对应的主库， read_only=0 判断为主库，否则为从库
+  local ip="$1"
+  local role
+  pass
+}
+
+
+desc_topo(){
+  # MySQL 拓扑信息检查
+  # 只需要提供集群里面的任何实例，就可以探测整个集群的拓扑信息
+  pass
+  return 1
+}
+
+inject_empty(){
+  # 将从库上面的异常gtid取出来，到主库注入空事务
+  pass
+  return 1
+}
+
+reset_master(){
+  # 在从库执行 reset_master,将异常gtid移除
+  pass
+  return 1
+}
+
+
 while getopts "a" opt; do
   case "$opt" in
-    a) ENABLE_AUTO_POS="yes"
-       shift
+    desc_topo)
+       desc_topo
        ;;
-    h) usage 0 ;;
+    inject_empty)
+       inject_empty
+       ;;
+    reset_master)
+      reset_master
+      ;;
     *) usage 1 ;;
   esac
 done
