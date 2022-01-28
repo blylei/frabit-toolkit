@@ -13,7 +13,6 @@ set -eu
 
 db_user=''
 db_passwd=''
-db_port=3306
 
 myname=$(basename $0)
 [ -f /etc/profile.d/frabit-toolkit.sh ] && . /etc/profile.d/frabit-toolkit.sh
@@ -114,12 +113,14 @@ inject_empty(){
 reset_master(){
   # 在从库执行 reset_master,将异常gtid移除
   pass
+
   return 1
 }
 
 enable_gtid(){
-  # 在从库执行 reset_master,将异常gtid移除
-  pass
+  # 在从库执行 reset_master,将主从复制模式从file:position 切换到gtid模式
+  local sql="STOP SLAVE;CHANGE MASTER TO MASTER_AUTO_POSITION=1;START SLAVE;"
+  init_conn "$host" "$sql"
   return 1
 }
 
@@ -139,6 +140,9 @@ run_cmd(){
     "desc-topo") desc_topo ;;              # 探测拓扑结构
     "inject-empty") inject_empty ;;        # 到主库注入空事务
     "reset-master") reset_master ;;        # 重置从库的gtid_purged
+    "enable-gtid") enable_gtid ;;          # 主从复制切换到gtid模式
+    "disable-gtid") disable_gtid ;;        # 主从复制切换到file:position模式
+    "find-master") find_master ;;          # 根据提供的IP地址，返回该实例对应的主库
 
     *) fail "不支持 $cmd" ;;
   esac
@@ -151,24 +155,6 @@ main(){
 }
 
 main
-
-while getopts "a" opt; do
-  case "$opt" in
-    desc_topo)
-       desc_topo
-       ;;
-    inject_empty)
-       inject_empty
-       ;;
-    reset_master)
-      reset_master
-      ;;
-    *) usage 1 ;;
-  esac
-done
-
-node1="$1"
-node2="$2"
 
 gtid_purged=$(mysql -h $node2 -sse "SELECT @@global.gtid_purged")
 gtid_missing=$(mysql -h $node1 -sse "SELECT GTID_SUBTRACT('$gtid_purged', @@global.gtid_executed)")
