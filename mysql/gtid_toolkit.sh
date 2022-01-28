@@ -15,24 +15,54 @@ db_user=''
 db_passwd=''
 db_port=3306
 
+myname=$(basename $0)
+[ -f /etc/profile.d/frabit-toolkit.sh ] && . /etc/profile.d/frabit-toolkit.sh
 error_file=/tmp/gtid_toolkit.log
 
-## inject-empty
-## reset-master
-## desc-topo
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    "-help"|"--help")                     set -- "$@" "-h" ;;
+    "-cmd"|"--cmd")                       set -- "$@" "-c" ;;
+    "-inst"|"--inst")                     set -- "$@" "-i" ;;
+    *)                                    set -- "$@" "$arg"
+  esac
+done
 
-usage() {
-  echo "usage: $0 [options] node1 node2"
-  echo "      ${DESCRIPTION}"                                           1>&2
-  echo "      -a      Enable auto-pos if node1 can auto-post on node2 " 1>&2
-  echo "      -h      Print this help"                                  1>&2
-  exit $1
+while getopts "c:i:h:" OPTION
+do
+  case $OPTION in
+    h) cmd="help" ;;
+    c) cmd="$OPTARG" ;;
+    i) inst="$OPTARG" ;;
+    *) echo "未知选项" ;;
+  esac
+done
+
+universal_sed() {
+  if [[ $(uname) == "Darwin" || $(uname) == *"BSD"* ]]; then
+    gsed "$@"
+  else
+    sed "$@"
+  fi
+}
+
+fail(){
+  # 输出错误日志，并退出脚本执行
+  message=${myname[$$]}: "$1"
+  >&2 echo "$message"
+  exit 1
 }
 
 log() {
   # 将操作日志格式化以后登记到日志文件内
   dt_flg=$(date +'%F %T')
   echo "$dt_flg $1" >>${error_file}
+}
+
+print_result(){
+  # 将命令行的运行结果，格式化后输出到终端
+  pass
 }
 
 init_conn(){
@@ -43,13 +73,29 @@ init_conn(){
   return 1
 }
 
+prompt_help {
+  echo "用法: gtid-toolkit -c <cmd> -i instance"
+  echo "举例: gtid-toolkit -c desc-topo -i 192.168.100.48"
+  echo "选项:"
+  echo "
+  -h, --help
+    输出帮助文档
+  -c <cmd>
+    指定需要执行的命令
+  -i <ip_addr>
+    数据库实例
+"
+
+  cat "$0" | universal_sed -n '/run_command/,/esac/p' | egrep '".*"[)].*;;' | universal_sed -r -e 's/"(.*?)".*#(.*)/\1~\2/' | column -t -s "~"
+}
+
+# ----------------------------------------------以下函数与命令行对应------------------------------------------
 find_master(){
   # 根据提供的数据库IP地址，找到对应的主库， read_only=0 判断为主库，否则为从库
   local ip="$1"
   local role
   pass
 }
-
 
 desc_topo(){
   # MySQL 拓扑信息检查
@@ -70,6 +116,40 @@ reset_master(){
   return 1
 }
 
+enable_gtid(){
+  # 在从库执行 reset_master,将异常gtid移除
+  pass
+  return 1
+}
+
+disable_gtid(){
+  # 在从库执行 reset_master,将异常gtid移除
+  pass
+  return 1
+}
+
+run_cmd(){
+  # 运行命令
+  if [ -z "$cmd" ] ; then
+    fail "No command given. Use $myname -c <cmd> [...] to do something useful"
+  fi
+  cmd=$(echo $cmd | universal_sed -e 's/slave/replica/')
+  case $cmd in
+    "desc-topo") desc_topo ;;              # 探测拓扑结构
+    "inject-empty") inject_empty ;;        # 到主库注入空事务
+    "reset-master") reset_master ;;        # 重置从库的gtid_purged
+
+    *) fail "不支持 $cmd" ;;
+  esac
+}
+
+main(){
+  # 脚本入口
+  pass
+  run_cmd
+}
+
+main
 
 while getopts "a" opt; do
   case "$opt" in
@@ -95,16 +175,4 @@ gtid_missing=$(mysql -h $node1 -sse "SELECT GTID_SUBTRACT('$gtid_purged', @@glob
 if [[ "$gtid_missing" ]]; then
   echo "$node1 cannot auto-position on $node2, missing GTID sets $gtid_missing" >&2
   exit 1
-fi
-
-if [[ $ENABLE_AUTO_POS ]]; then
-  echo "OK, $node1 can auto-position on $node2, enabling..."
-  mysql -h $node1 -e "STOP SLAVE; CHANGE MASTER TO MASTER_AUTO_POSITION=1; START SLAVE;"
-  sleep 1
-  mysql -h $node1 -e "SHOW SLAVE STATUS\G"
-  echo "Auto-position enabled on $node1. Verify replica is running in output above."
-else
-  echo "OK, $node1 can auto-position on $node2. Use option -a to enable, or execute:"
-  echo "    mysql -h $node1 -e \"STOP SLAVE; CHANGE MASTER TO MASTER_AUTO_POSITION=1; START SLAVE;\""
-  echo "    mysql -h $node1 -e \"SHOW SLAVE STATUS\G\""
 fi
