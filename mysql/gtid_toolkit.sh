@@ -57,6 +57,7 @@ fail(){
 log() {
   # 将操作日志格式化以后登记到日志文件内
   dt_flg=$(date +'%F %T')
+
   echo "$dt_flg $1" >>${error_file}
 }
 
@@ -73,7 +74,7 @@ init_conn(){
   return 1
 }
 
-prompt_help {
+prompt_help() {
   echo "用法: gtid-toolkit -c <cmd> -i instance"
   echo "举例: gtid-toolkit -c desc-topo -i 192.168.100.48"
   echo "选项:"
@@ -86,7 +87,7 @@ prompt_help {
     数据库实例
 "
 
-  cat "$0" | universal_sed -n '/run_command/,/esac/p' | egrep '".*"[)].*;;' | universal_sed -r -e 's/"(.*?)".*#(.*)/\1~\2/' | column -t -s "~"
+  cat "$0" | universal_sed -n '/run_cmd/,/esac/p' | egrep '".*"[)].*;;' | universal_sed -r -e 's/"(.*?)".*#(.*)/\1~\2/' | column -t -s "~"
 }
 
 # ----------------------------------------------以下函数与命令行对应------------------------------------------
