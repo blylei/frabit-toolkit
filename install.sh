@@ -1,6 +1,6 @@
 #! /bin/bash
 
-exe_path="/usr/bin"
+exe_path="/usr/local/bin"
 # 检查环境变量文件是否存在，不存在则创建
 if [[ ! -f /etc/profile.d/frabit-toolkit.sh ]]; then
   echo "#! /bin/bash" >>/etc/profile.d/frabit-toolkit.sh
@@ -9,3 +9,5 @@ if [[ ! -f /etc/profile.d/frabit-toolkit.sh ]]; then
   chmod 755 /etc/profile.d/frabit-toolkit.sh
 fi
 
+# 给脚本创建软连接
+cp
