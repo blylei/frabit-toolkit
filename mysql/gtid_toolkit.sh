@@ -18,9 +18,10 @@ myname=$(basename $0)
 [ -f /etc/profile.d/frabit-toolkit.sh ] && . /etc/profile.d/frabit-toolkit.sh
 error_file=/tmp/gtid_toolkit.log
 
+# 处理命令行参数
 for arg in "$@";
 do
-  shift
+shift
   case "$arg" in
     "-help"|"--help")                     set -- "$@" "-h" ;;
     "-cmd"|"--cmd")                       set -- "$@" "-c" ;;
@@ -38,6 +39,7 @@ do
     *) echo "未知选项" ;;
   esac
 done
+
 
 universal_sed() {
   if [[ $(uname) == "Darwin" || $(uname) == *"BSD"* ]]; then
