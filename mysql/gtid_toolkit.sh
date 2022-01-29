@@ -60,6 +60,15 @@ log() {
   echo "$dt_flg $1" >>${error_file}
 }
 
+assert_nonempty() {
+  name="$1"
+  value="$2"
+
+  if [ -z "$value" ] ; then
+    fail "$name must be provided"
+  fi
+}
+
 print_result(){
   # 将命令行的运行结果，格式化后输出到终端
   pass
@@ -92,9 +101,17 @@ prompt_help() {
 # ----------------------------------------------以下函数与命令行对应------------------------------------------
 find_master(){
   # 根据提供的数据库IP地址，找到对应的主库， read_only=0 判断为主库，否则为从库
-  local ip="$1"
-  local role
-  pass
+  local host="$i"
+  local sql="select @@global.read_only;"
+  local master="127.0.0.1:3306"
+  is_master=$(init_conn "$host" "$sql")
+  if [[ "$is_master" -eq 1 ]];then
+    master="$(init_conn "$host" "select @@global.report_host,@@global.hostname;")"
+  else
+    pass
+  fi
+  echo "$master"
+  return 0
 }
 
 desc_topo(){
@@ -130,8 +147,22 @@ disable_gtid(){
   return 1
 }
 
+enable_semisync(){
+  # 在从库执行 reset_master,将主从复制模式从file:position 切换到gtid模式
+  local sql="STOP SLAVE;CHANGE MASTER TO MASTER_AUTO_POSITION=1;START SLAVE;"
+  init_conn "$host" "$sql"
+  return 1
+}
+
+disable_semisync(){
+  # 在从库执行 reset_master,将异常gtid移除
+  pass
+  return 1
+}
+
 run_cmd(){
   # 运行命令
+  local cmd="$c"
   if [ -z "$cmd" ] ; then
     fail "No command given. Use $myname -c <cmd> [...] to do something useful"
   fi
@@ -156,10 +187,3 @@ main(){
 
 main
 
-gtid_purged=$(mysql -h $node2 -sse "SELECT @@global.gtid_purged")
-gtid_missing=$(mysql -h $node1 -sse "SELECT GTID_SUBTRACT('$gtid_purged', @@global.gtid_executed)")
-
-if [[ "$gtid_missing" ]]; then
-  echo "$node1 cannot auto-position on $node2, missing GTID sets $gtid_missing" >&2
-  exit 1
-fi
