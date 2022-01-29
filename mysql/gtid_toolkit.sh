@@ -18,7 +18,8 @@ myname=$(basename $0)
 [ -f /etc/profile.d/frabit-toolkit.sh ] && . /etc/profile.d/frabit-toolkit.sh
 error_file=/tmp/gtid_toolkit.log
 
-for arg in "$@"; do
+for arg in "$@";
+do
   shift
   case "$arg" in
     "-help"|"--help")                     set -- "$@" "-h" ;;
@@ -65,7 +66,7 @@ assert_nonempty() {
   value="$2"
 
   if [ -z "$value" ] ; then
-    fail "$name must be provided"
+    fail "$name 必须提供对应的值"
   fi
 }
 
@@ -174,6 +175,8 @@ run_cmd(){
     "enable-gtid") enable_gtid ;;          # 主从复制切换到gtid模式
     "disable-gtid") disable_gtid ;;        # 主从复制切换到file:position模式
     "find-master") find_master ;;          # 根据提供的IP地址，返回该实例对应的主库
+    "enable-semisync") enable_semisync ;;  # 启用半同步复制
+    "disable-semisync") disable_semisync ;;  # 禁用半同步复制
 
     *) fail "不支持 $cmd" ;;
   esac
@@ -181,9 +184,7 @@ run_cmd(){
 
 main(){
   # 脚本入口
-  pass
   run_cmd
 }
 
 main
-
