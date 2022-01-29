@@ -165,7 +165,6 @@ disable_semisync(){
 
 run_cmd(){
   # 运行命令
-  local cmd="$c"
   if [ -z "$cmd" ] ; then
     fail "No command given. Use $myname -c <cmd> [...] to do something useful"
   fi
