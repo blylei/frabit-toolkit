@@ -9,14 +9,21 @@ if [[ ! -f /etc/profile.d/frabit-toolkit.sh ]]; then
   chmod 755 /etc/profile.d/frabit-toolkit.sh
 fi
 
-# 给脚本创建软连接
-cp ./* "$exec_path"/frabit-toolkit
-
-for dir in $(ls -l  "$exec_path"/frabit-toolkit | awk '/^d/ { print $9}')
+# 将脚本复制到 /usr/local/bin路径下
+for toolkit in $(ls -l ./mysql | grep -v total)
 do
-  for toolkit in $(ls | "$exec_path"/frabit-toolkit/"$dir")
-  do
     name=$(echo "$toolkit" | awk -F'.' '{print $1}' | sed -r -e 's/_/-/')
-    ln -s "$exec_path"/frabit-toolkit/mysql/"$toolkit" "$exec_path"/"$name"
-  done
+    ln -s "$exec_path"/frabit-toolkit/mysql/"$toolkit" "$exec_path"/bin/"$name"
+done
+
+for toolkit in $(ls | "$exec_path"/frabit-toolkit/redis)
+do
+    name=$(echo "$toolkit" | awk -F'.' '{print $1}' | sed -r -e 's/_/-/')
+    ln -s "$exec_path"/frabit-toolkit/mysql/"$toolkit" "$exec_path"/bin/"$name"
+done
+
+for toolkit in $(ls | "$exec_path"/frabit-toolkit/mongodb)
+do
+    name=$(echo "$toolkit" | awk -F'.' '{print $1}' | sed -r -e 's/_/-/')
+    ln -s "$exec_path"/frabit-toolkit/mysql/"$toolkit" "$exec_path"/bin/"$name"
 done
