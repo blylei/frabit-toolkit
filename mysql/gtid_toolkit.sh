@@ -169,8 +169,8 @@ run_cmd(){
   if [ -z "$cmd" ] ; then
     fail "No command given. Use $myname -c <cmd> [...] to do something useful"
   fi
-  cmd=$(echo $cmd | universal_sed -e 's/slave/replica/')
   case $cmd in
+    "help") prompt_help ;;                 # 向控制台输出帮助信息
     "desc-topo") desc_topo ;;              # 探测拓扑结构
     "inject-empty") inject_empty ;;        # 到主库注入空事务
     "reset-master") reset_master ;;        # 重置从库的gtid_purged
