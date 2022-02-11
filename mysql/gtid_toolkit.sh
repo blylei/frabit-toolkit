@@ -10,9 +10,6 @@
 # V1.0.0       zhangl   2021-12-28      create this script
 #-----------------------------------------------------------------------------------------------------------
 
-db_user=''
-db_passwd=''
-
 myname=$(basename $0)
 [ -f /etc/profile.d/frabit-toolkit.sh ] && . /etc/profile.d/frabit-toolkit.sh
 error_file=/tmp/gtid_toolkit.log
@@ -24,19 +21,25 @@ error_file=/tmp/gtid_toolkit.log
 for arg in "$@";do
 shift
   case "$arg" in
-    "-help"|"--help")                     set -- "$@" "-h" ;;
+    "-help"|"--help")                     set -- "$@" "-H" ;;
     "-cmd"|"--cmd")                       set -- "$@" "-c" ;;
-    "-inst"|"--inst")                     set -- "$@" "-i" ;;
+    "-host"|"--host")                     set -- "$@" "-h" ;;
+    "-port"|"--port")                     set -- "$@" "-P" ;;
+    "-user"|"--user")                     set -- "$@" "-u" ;;
+    "-passwd"|"--passwd")                 set -- "$@" "-p" ;;
     *)                                    set -- "$@" "$arg"
   esac
 done
 
-while getopts "c:i:h" OPTION
+while getopts "c:h:P:u:p:H" OPTION
 do
   case $OPTION in
-    h) cmd="help" ;;
+    H) cmd="help" ;;
     c) cmd="$OPTARG" ;;
-    i) inst="$OPTARG" ;;
+    h) host="$OPTARG" ;;
+    P) port="$OPTARG" ;;
+    u) user="$OPTARG" ;;
+    p) passwd="$OPTARG" ;;
     *) echo "未知选项" ;;
   esac
 done
@@ -50,6 +53,15 @@ universal_sed() {
   else
     sed "$@"
   fi
+}
+
+about_toolkits(){
+ # 展示项目信息
+ proj_url='https://github.com/frabitech/frabit-toolkit'
+ echo "gtid-toolkit 是frabit-toolkits中的一个gtid诊断工具。由Blylei开发，并根据GPLv3开源许可证进行发布到Github
+Copyright (c) 2021, 2022 blylei.info@gmail.com
+GitHub: $proj_url
+ "
 }
 
 fail(){
@@ -77,7 +89,7 @@ section () {
    }'
 }
 
-NAME_VAL_LEN=12
+NAME_VAL_LEN=30
 name_val () {
    printf "%+*s | %s\n" "${NAME_VAL_LEN}" "$1" "$2"
 }
@@ -91,46 +103,63 @@ assert_nonempty() {
   fi
 }
 
-print_result(){
-  # 将命令行的运行结果，格式化后输出到终端
-  section "gtid-toolkit运行结果展示"
+check_db_opts(){
+  # 检查连接数据库的信息是否提供
+  assert_nonempty "host" "$host"
+  assert_nonempty "user" "$user"
+  assert_nonempty "passwd" "$passwd"
 }
 
-init_conn(){
+exec_sql(){
   # 根据数据库IP地址，创建连接并执行相应SQL
-  local host="$1"
-  local sql="$2"
-  mysql -h"$host" -u "$db_user" -p"$db_passwd" -NBe "$sql"
-  return 1
+  local sql="$1"
+  # 如果没有在命令行里提供端口号，则使用MySQL默认的3306
+  if [ -z "$port" ] ; then
+    port=3306
+  fi
+  mysql -h"$host" -P"$port" -u"$user" -p"$passwd" -NBe "$sql" 2>/dev/null
+  return 0
+}
+
+
+print_result(){
+  # 将命令行的运行结果，格式化后输出到终端
+  local info="$1"
+  local master_ip=""
+  local master_hostname=""
+  section "运行结果展示"
+  name_val "时间" $(date +'%F %T')
+  section "主库信息"
+  name_val "主机地址" "$master_ip"
+  name_val "主机名称" "$master_hostname"
 }
 
 start_slave(){
   # 根据数据库IP地址，启动主从同步
-  local host="$1"
   local sql="START SLAVE;"
-  ret=$(init_conn "$host" "$sql")
-  return 1
+  ret=$(exec_sql "$sql")
+  return 0
 }
 
 stop_slave(){
   # 根据数据库IP地址，停止主从同步
-  local host="$1"
   local sql="STOP SLAVE;"
-  ret=$(init_conn "$host" "$sql")
+  ret=$(exec_sql "$sql")
   return 1
 }
 
 prompt_help() {
-  echo "用法: gtid-toolkit -c <cmd> -i instance"
-  echo "举例: gtid-toolkit -c desc-topo -i 192.168.100.48"
+  about_toolkits
+  echo "用法: gtid-toolkit -c <cmd> -h ip_addr [-P <port>] -u <user> -p <passwd>"
+  echo "举例: gtid-toolkit -c desc-topo -h 192.168.100.48 -u dbadmin -p Test_123"
   echo "选项:"
   echo "
-  -h, --help
-    输出帮助文档
-  -c <cmd>
-    指定需要执行的命令
-  -i <ip_addr>
-    数据库实例
+  -H, --help            输出帮助文档并退出脚本
+  -c,--cmd <cmd>        【必选】指定需要执行的命令
+  -h,--host <ip_addr>   【必选】数据库实例地址
+  -P,--port <3306>      【可选】数据库端口号，不提供的话，默认为3306
+  -u,--user <username>  【必选】数据库用户，需要在整个MySQL集群上都存在
+  -p,--passwd <passwd>  【必选】数据库密码，需要在整个MySQL集群上都相同
 "
 
   cat "$0" | universal_sed -n '/run_cmd/,/esac/p' | egrep '".*"[)].*;;' | universal_sed -r -e 's/"(.*?)".*#(.*)/\1~\2/' | column -t -s "~"
@@ -142,16 +171,15 @@ prompt_help() {
 
 find_master(){
   # 根据提供的数据库IP地址，找到对应的主库， read_only=0 判断为主库，否则为从库
-  local host="$i"
   local sql="select @@global.read_only;"
   local master="127.0.0.1:3306"
-  is_master=$(init_conn "$host" "$sql")
-  if [[ "$is_master" -eq 1 ]];then
-    master="$(init_conn "$host" "select @@global.report_host,@@global.hostname;")"
+  is_master=$(exec_sql "$sql")
+  if [[ "$is_master" -eq 0 ]];then
+    master="$(exec_sql "select @@global.report_host,@@global.hostname;")"
   else
     pass
   fi
-  echo "$master"
+  print_result "$master"
   return 0
 }
 
@@ -178,7 +206,7 @@ reset_master(){
 enable_gtid(){
   # 在从库执行 reset_master,将主从复制模式从file:position 切换到gtid模式
   local sql="STOP SLAVE;CHANGE MASTER TO MASTER_AUTO_POSITION=1;START SLAVE;"
-  init_conn "$host" "$sql"
+  exec_sql "$sql"
   return 1
 }
 
@@ -191,7 +219,7 @@ disable_gtid(){
 enable_semisync(){
   # 在从库执行 reset_master,将主从复制模式从file:position 切换到gtid模式
   local sql="STOP SLAVE;CHANGE MASTER TO MASTER_AUTO_POSITION=1;START SLAVE;"
-  init_conn "$host" "$sql"
+  exec_sql "$sql"
   return 1
 }
 
@@ -227,6 +255,10 @@ run_cmd(){
 
 main(){
   # 脚本入口
+  if [ $cmd != "help" ] ; then
+    check_db_opts
+  fi
+
   run_cmd
 }
 
