@@ -9,7 +9,6 @@
 # Version      People   Date             Notes
 # V1.0.0       zhangl   2021-12-28      create this script
 #-----------------------------------------------------------------------------------------------------------
-set -eu
 
 db_user=''
 db_passwd=''
@@ -18,9 +17,9 @@ myname=$(basename $0)
 [ -f /etc/profile.d/frabit-toolkit.sh ] && . /etc/profile.d/frabit-toolkit.sh
 error_file=/tmp/gtid_toolkit.log
 
-# 处理命令行参数
-for arg in "$@";
-do
+# ---------------------------------------------接收并预处理命令行参数-----------------------------------------
+
+for arg in "$@";do
 shift
   case "$arg" in
     "-help"|"--help")                     set -- "$@" "-h" ;;
@@ -30,7 +29,7 @@ shift
   esac
 done
 
-while getopts "c:i:h:" OPTION
+while getopts "c:i:h" OPTION
 do
   case $OPTION in
     h) cmd="help" ;;
@@ -40,7 +39,7 @@ do
   esac
 done
 
-
+# ----------------------------------------------以下函数为共用的------------------------------------------
 universal_sed() {
   if [[ $(uname) == "Darwin" || $(uname) == *"BSD"* ]]; then
     gsed "$@"
@@ -136,19 +135,19 @@ find_master(){
 desc_topo(){
   # MySQL 拓扑信息检查
   # 只需要提供集群里面的任何实例，就可以探测整个集群的拓扑信息
-  pass
+  echo "功能待实现"
   return 1
 }
 
 inject_empty(){
   # 将从库上面的异常gtid取出来，到主库注入空事务
-  pass
+  echo "功能待实现"
   return 1
 }
 
 reset_master(){
   # 在从库执行 reset_master,将异常gtid移除
-  pass
+  echo "功能待实现"
 
   return 1
 }
@@ -162,7 +161,7 @@ enable_gtid(){
 
 disable_gtid(){
   # 在从库执行 reset_master,将异常gtid移除
-  pass
+  echo "功能待实现"
   return 1
 }
 
@@ -175,14 +174,14 @@ enable_semisync(){
 
 disable_semisync(){
   # 在从库执行 reset_master,将异常gtid移除
-  pass
+  echo "功能待实现"
   return 1
 }
 
 run_cmd(){
   # 运行命令
   if [ -z "$cmd" ] ; then
-    fail "No command given. Use $myname -c <cmd> [...] to do something useful"
+    fail "没有提供命令. 请使用 $myname -c <cmd> [...] 去完成某些实用操作"
   fi
   case $cmd in
     "help") prompt_help ;;                 # 向控制台输出帮助信息
