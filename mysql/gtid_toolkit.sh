@@ -58,7 +58,7 @@ universal_sed() {
 about_toolkits(){
  # 展示项目信息
  proj_url='https://github.com/frabitech/frabit-toolkit'
- echo "gtid-toolkit 是frabit-toolkits中的一个gtid诊断工具。由Blylei开发，并根据GPLv3开源许可证进行发布到Github
+ echo "gtid-toolkit 是frabit-toolkits中的一个gtid诊断工具。由Blylei开发，并根据GPLv3开源许可证发布到Github
 Copyright (c) 2021, 2022 blylei.info@gmail.com
 GitHub: $proj_url
  "
