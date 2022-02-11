@@ -63,6 +63,22 @@ log() {
   echo "$dt_flg $1" >>${error_file}
 }
 
+section () {
+   local str="$1"
+   awk -v var="${str} _" 'BEGIN {
+      line = sprintf("# %-60s", var);
+      i = index(line, "_");
+      x = substr(line, i);
+      gsub(/[_ \t]/, "#", x);
+      printf("%s%s\n", substr(line, 1, i-1), x);
+   }'
+}
+
+NAME_VAL_LEN=12
+name_val () {
+   printf "%+*s | %s\n" "${NAME_VAL_LEN}" "$1" "$2"
+}
+
 assert_nonempty() {
   name="$1"
   value="$2"
