@@ -272,11 +272,11 @@ run_cmd(){
     "enable-semisync") enable_semisync ;;    # 启用半同步复制
     "disable-semisync") disable_semisync ;;  # 禁用半同步复制
     "start-slave") start_slave ;;            # 启动主从复制，包含IO线程和SQL线程
-    "start-slave-io") start_slave_io ;;      # 启动主从复制，仅启动IO线程
-    "start-slave-sql") start_slave_sql ;;    # 启动主从复制，仅启动SQL线程
+    "start-slave-io") start_slave_io ;;      # 启动主从复制，仅IO线程
+    "start-slave-sql") start_slave_sql ;;    # 启动主从复制，仅SQL线程
     "stop-slave") stop_slave ;;              # 停止主从复制，包含IO线程和SQL线程
-    "stop-slave-io") stop_slave_io ;;        # 停止主从复制，仅启动IO线程
-    "stop-slave-sql") stop_slave_sql ;;      # 停止主从复制，仅启动SQL线程
+    "stop-slave-io") stop_slave_io ;;        # 停止主从复制，仅IO线程
+    "stop-slave-sql") stop_slave_sql ;;      # 停止主从复制，仅SQL线程
 
     *) fail "不支持 $cmd" ;;
   esac
