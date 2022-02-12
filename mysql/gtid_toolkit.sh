@@ -203,21 +203,21 @@ start_slave_io(){
 
 start_slave_sql(){
   # 根据数据库IP地址，启动主从同步
-  local sql="START SLAVE sql_thread;"
+  local sql="START SLAVE sql_thread;show slave status;"
   ret=$(exec_sql "$sql")
   return 0
 }
 
 stop_slave(){
   # 根据数据库IP地址，停止主从同步
-  local sql="STOP SLAVE;"
+  local sql="STOP SLAVE;show slave status;"
   ret=$(exec_sql "$sql")
   return 1
 }
 
 stop_slave_io(){
   # 根据数据库IP地址，停止主从同步
-  local sql="STOP SLAVE io_thread;"
+  local sql="STOP SLAVE io_thread;show slave status;"
   ret=$(exec_sql "$sql")
   return 1
 }
