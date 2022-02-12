@@ -1,17 +1,12 @@
 #! /bin/bash
-#---------------------------------------------------- Head info -------------------------------------------
-# author          : zhangl (blylei@163.com)
-# create datetime : 2021-12-28
-# funcation       : fix MySQL【Oracle's or Percona】 gtid issue
-# script name     : gtid_toolkit.sh
-#-----------------------------------------------------------------------------------------------------------
-#-------------------------------------------------- Modified logs ------------------------------------------
-# Version      People   Date             Notes
-# V1.0.0       zhangl   2021-12-28      create this script
-#-----------------------------------------------------------------------------------------------------------
+# (c) 2022 frabit-toolkit Project maintained and limited by Blylei < blylei.info@gmail.com >
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+#
+# This toolkit is part of frabit-toolkit used for Oracle MySQL and Percona server
+#
 
 myname=$(basename $0)
-[ -f /etc/profile.d/frabit-toolkit.sh ] && . /etc/profile.d/frabit-toolkit.sh
+[ -f /etc/profile.d/ft_common.sh ] && . /etc/profile.d/ft_common.sh
 error_file=/tmp/gtid_toolkit.log
 
 # #####################################################################################################
@@ -53,17 +48,6 @@ universal_sed() {
   else
     sed "$@"
   fi
-}
-
-about_toolkits(){
- # 展示项目信息
- local VERSION='2.0.1'
- local proj_url='https://github.com/frabitech/frabit-toolkit'
- echo "gtid-toolkit 是frabit-toolkits中的一个gtid诊断工具。由Blylei开发，并根据GPLv3开源许可证发布到Github
-Copyright (c) 2021, 2022 blylei.info@gmail.com
-GitHub: $proj_url
-Version: $VERSION
- "
 }
 
 fail(){
