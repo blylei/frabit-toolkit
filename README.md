@@ -16,9 +16,13 @@
 - 3、功能预览
   ```bash
   shell> gtid-toolkit -c help
-  gtid-toolkit 是frabit-toolkits中的一个gtid诊断工具。由Blylei开发，并根据GPLv3开源许可证进行发布到Github
-  Copyright (c) 2021, 2022 blylei.info@gmail.com
+  (c) 2022 frabit-toolkit Project maintained and limited by Blylei < blylei.info@gmail.com >
+  GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+  This toolkit is part of frabit-toolkit used for Oracle MySQL and Percona server
+
   GitHub: https://github.com/frabitech/frabit-toolkit
+  Version: 2.0.1
  
   用法: gtid-toolkit -c <cmd> -h ip_addr [-P <port>] -u <user> -p <passwd>
   举例: gtid-toolkit -c desc-topo -h 192.168.100.48 -u dbadmin -p Test_123
@@ -40,4 +44,10 @@
     find-master        根据提供的IP地址，返回该实例对应的主库
     enable-semisync    启用半同步复制
     disable-semisync   禁用半同步复制
+    start-slave        启动主从复制，包含IO线程和SQL线程
+    start-slave-io     启动主从复制，仅IO线程
+    start-slave-sql    启动主从复制，仅SQL线程
+    stop-slave         停止主从复制，包含IO线程和SQL线程
+    stop-slave-io      停止主从复制，仅IO线程
+    stop-slave-sql     停止主从复制，仅SQL线程
   ```
