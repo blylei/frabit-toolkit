@@ -121,7 +121,6 @@ exec_sql(){
   return 0
 }
 
-
 print_result(){
   # 将命令行的运行结果，格式化后输出到终端
   local info="$1"
@@ -132,20 +131,6 @@ print_result(){
   section "主库信息"
   name_val "主机地址" "$master_ip"
   name_val "主机名称" "$master_hostname"
-}
-
-start_slave(){
-  # 根据数据库IP地址，启动主从同步
-  local sql="START SLAVE;"
-  ret=$(exec_sql "$sql")
-  return 0
-}
-
-stop_slave(){
-  # 根据数据库IP地址，停止主从同步
-  local sql="STOP SLAVE;"
-  ret=$(exec_sql "$sql")
-  return 1
 }
 
 prompt_help() {
@@ -216,6 +201,48 @@ disable_gtid(){
   return 1
 }
 
+start_slave(){
+  # 根据数据库IP地址，启动主从同步
+  local sql="START SLAVE;"
+  ret=$(exec_sql "$sql")
+  return 0
+}
+
+start_slave_io(){
+  # 根据数据库IP地址，启动主从同步
+  local sql="START SLAVE io_thread;"
+  ret=$(exec_sql "$sql")
+  return 0
+}
+
+start_slave_sql(){
+  # 根据数据库IP地址，启动主从同步
+  local sql="START SLAVE sql_thread;"
+  ret=$(exec_sql "$sql")
+  return 0
+}
+
+stop_slave(){
+  # 根据数据库IP地址，停止主从同步
+  local sql="STOP SLAVE;"
+  ret=$(exec_sql "$sql")
+  return 1
+}
+
+stop_slave_io(){
+  # 根据数据库IP地址，停止主从同步
+  local sql="STOP SLAVE io_thread;"
+  ret=$(exec_sql "$sql")
+  return 1
+}
+
+stop_slave_sql(){
+  # 根据数据库IP地址，停止主从同步
+  local sql="STOP SLAVE sql_thread;"
+  ret=$(exec_sql "$sql")
+  return 1
+}
+
 enable_semisync(){
   # 在从库执行 reset_master,将主从复制模式从file:position 切换到gtid模式
   local sql="STOP SLAVE;CHANGE MASTER TO MASTER_AUTO_POSITION=1;START SLAVE;"
@@ -242,8 +269,14 @@ run_cmd(){
     "enable-gtid") enable_gtid ;;          # 主从复制切换到gtid模式
     "disable-gtid") disable_gtid ;;        # 主从复制切换到file:position模式
     "find-master") find_master ;;          # 根据提供的IP地址，返回该实例对应的主库
-    "enable-semisync") enable_semisync ;;  # 启用半同步复制
+    "enable-semisync") enable_semisync ;;    # 启用半同步复制
     "disable-semisync") disable_semisync ;;  # 禁用半同步复制
+    "start-slave") start_slave ;;            # 启动主从复制，包含IO线程和SQL线程
+    "start-slave-io") start_slave_io ;;      # 启动主从复制，仅启动IO线程
+    "start-slave-sql") start_slave_sql ;;    # 启动主从复制，仅启动SQL线程
+    "stop-slave") stop_slave ;;              # 停止主从复制，包含IO线程和SQL线程
+    "stop-slave-io") stop_slave_io ;;        # 停止主从复制，仅启动IO线程
+    "stop-slave-sql") stop_slave_sql ;;      # 停止主从复制，仅启动SQL线程
 
     *) fail "不支持 $cmd" ;;
   esac
