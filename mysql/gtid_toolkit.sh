@@ -119,6 +119,12 @@ print_result(){
   name_val "主机名称" "$master_hostname"
 }
 
+get_instence_info(){
+  # 根据提供的IP地址，提取MySQL实例信息
+  local host="$1"
+  exec_sql
+}
+
 prompt_help() {
   about_toolkits
   echo "用法: gtid-toolkit -c <cmd> -h ip_addr [-P <port>] -u <user> -p <passwd>"
