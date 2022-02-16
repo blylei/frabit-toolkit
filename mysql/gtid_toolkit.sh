@@ -180,6 +180,13 @@ reset_master(){
   return 1
 }
 
+check_repl_status(){
+  # 根据提供的数据库IP地址，查看对应从库的主从复制状态
+  local sql="SHOW SLAVE STATUS"
+  ret=$(exec_sql "$sql")
+  return 0
+}
+
 enable_gtid(){
   # 在从库执行 reset_master,将主从复制模式从file:position 切换到gtid模式
   local sql="STOP SLAVE;CHANGE MASTER TO MASTER_AUTO_POSITION=1;START SLAVE;"
@@ -269,6 +276,7 @@ run_cmd(){
     "stop-slave") stop_slave ;;              # 停止主从复制，包含IO线程和SQL线程
     "stop-slave-io") stop_slave_io ;;        # 停止主从复制，仅IO线程
     "stop-slave-sql") stop_slave_sql ;;      # 停止主从复制，仅SQL线程
+    "check-repl-status") check_repl_status ;;      # 检查MySQL主从复制状态
 
     *) fail "不支持 $cmd" ;;
   esac
