@@ -50,4 +50,5 @@
     stop-slave         停止主从复制，包含IO线程和SQL线程
     stop-slave-io      停止主从复制，仅IO线程
     stop-slave-sql     停止主从复制，仅SQL线程
+    check-repl-status  检查MySQL主从复制状态
   ```
