@@ -19,5 +19,49 @@ Version: $VERSION
  "
 }
 
+error() {
+  local lineno=$1
+  shift
+  if [[ -n "$lineno" ]]; then
+    printf "${BD}ERROR${NBD} (line:$lineno) : ${*//%/%%}\n" 1>&2
+  else
+    printf "${BD}ERROR${NBD} : ${*//%/%%}\n" 1>&2
+  fi
+}
+
+warning() {
+  local lineno=$1
+  shift
+  if [[ -n "$lineno" ]]; then
+    printf "${BD}WARNING${NBD} (line:$lineno) : ${*//%/%%}\n" 1>&2
+  else
+    printf "${BD}WARNING${NBD}: ${*//%/%%}\n" 1>&2
+  fi
+}
+
+info() {
+  if [[ $DEBUG -eq 1 ]]; then
+    local lineno=$1
+    shift
+    if [[ -n "$lineno" ]]; then
+      printf "${RED}${BD}info (line:$lineno) : ${*//%/%%}${NBD}${NRED}\n" 1>&2
+    else
+      printf "${RED}info: ${*//%/%%}${NRED}\n" 1>&2
+    fi
+  fi
+}
+
+debug() {
+  if [[ $DEBUG -eq 1 ]]; then
+    local lineno=$1
+    shift
+    if [[ -n "$lineno" ]]; then
+      printf "${RED}${BD}debug (line:$lineno) : ${*//%/%%}${NBD}${NRED}\n" 1>&2
+    else
+      printf "${RED}debug: ${*//%/%%}${NRED}\n" 1>&2
+    fi
+  fi
+}
+
 # 将安全系数较高的选项以环境变量的形式提供
 export VARIABLE="test"
