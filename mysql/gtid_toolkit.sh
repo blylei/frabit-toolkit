@@ -17,6 +17,7 @@ for arg in "$@";do
 shift
   case "$arg" in
     "-help"|"--help")                     set -- "$@" "-H" ;;
+    "-version"|"--version")               set -- "$@" "-V" ;;
     "-cmd"|"--cmd")                       set -- "$@" "-c" ;;
     "-host"|"--host")                     set -- "$@" "-h" ;;
     "-port"|"--port")                     set -- "$@" "-P" ;;
@@ -26,10 +27,11 @@ shift
   esac
 done
 
-while getopts "c:h:P:u:p:H" OPTION
+while getopts "c:h:P:u:p:HV" OPTION
 do
   case $OPTION in
     H) cmd="help" ;;
+    V) cmd="version" ;;
     c) cmd="$OPTARG" ;;
     h) host="$OPTARG" ;;
     P) port="$OPTARG" ;;
@@ -140,19 +142,20 @@ get_instence_info(){
 }
 
 prompt_help() {
-  about_toolkits
+  echo ""
   echo "用法: gtid-toolkit -c <cmd> -h ip_addr [-P <port>] -u <user> -p <passwd>"
   echo "举例: gtid-toolkit -c desc-topo -h 192.168.100.48 -u dbadmin -p Test_123"
   echo "选项:"
   echo "
   -H, --help            输出帮助文档并退出脚本
+  -V, --version         输出版本号并退出脚本
   -c,--cmd <cmd>        【必选】指定需要执行的命令
   -h,--host <ip_addr>   【必选】数据库实例地址
   -P,--port <3306>      【可选】数据库端口号，不提供的话，默认为3306
   -u,--user <username>  【必选】数据库用户，需要在整个MySQL集群上都存在
   -p,--passwd <passwd>  【必选】数据库密码，需要在整个MySQL集群上都相同
 "
-
+  echo "可用命令:"
   cat "$0" | universal_sed -n '/run_cmd/,/esac/p' | egrep '".*"[)].*;;' | universal_sed -r -e 's/"(.*?)".*#(.*)/\1~\2/' | column -t -s "~"
 }
 
@@ -276,6 +279,7 @@ run_cmd(){
   fi
   case $cmd in
     "help") prompt_help ;;                 # 向控制台输出帮助信息
+    "version") about_toolkits ;;           # 向控制台输出版本号和项目信息
     "desc-topo") desc_topo ;;              # 探测MySQL集群拓扑结构
     "inject-empty") inject_empty ;;        # 到主库注入空事务
     "reset-master") reset_master ;;        # 重置从库的gtid_purged
@@ -302,7 +306,8 @@ run_cmd(){
 
 main(){
   # 脚本入口
-  if [ $cmd != "help" ] ; then
+  # if [[ "$cmd" != "help" || "$cmd" != "version" ]]; then
+  if [ "$cmd" != "help" ]; then
     check_db_opts
   fi
 
