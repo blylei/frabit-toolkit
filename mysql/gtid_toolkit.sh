@@ -307,7 +307,7 @@ run_cmd(){
 main(){
   # 脚本入口
   # if [[ "$cmd" != "help" || "$cmd" != "version" ]]; then
-  if [ "$cmd" != "help" ]; then
+  if [[ "$cmd" != "help" &&  "$cmd" != "version" ]]; then
     check_db_opts
   fi
 

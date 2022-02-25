@@ -14,16 +14,10 @@
   bash ./install.sh
   ```
 - 3、功能预览
+
   ```bash
   shell> gtid-toolkit -c help
-  (c) 2022 frabit-toolkit Project maintained and limited by Blylei < blylei.info@gmail.com >
-  GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
-  This toolkit is part of frabit-toolkit used for Oracle's MySQL and Percona server
-
-  GitHub: https://github.com/frabitech/frabit-toolkit
-  Version: 2.0.1
- 
+   
   用法: gtid-toolkit -c <cmd> -h ip_addr [-P <port>] -u <user> -p <passwd>
   举例: gtid-toolkit -c desc-topo -h 192.168.100.48 -u dbadmin -p Test_123
   选项:
@@ -52,4 +46,15 @@
     stop-slave-io      停止主从复制，仅IO线程
     stop-slave-sql     停止主从复制，仅SQL线程
     check-repl-status  检查MySQL主从复制状态
+  ```
+  ```bash
+  shell> gtid-toolkit --version
+  (c) 2022 frabit-toolkit Project maintained and limited by Blylei < blylei.info@gmail.com >
+  GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+  This toolkit is part of frabit-toolkit used for Oracle MySQL and Percona server
+
+  GitHub: https://github.com/frabitech/frabit-toolkit
+  Version: 2.0.1 
+  
   ```
