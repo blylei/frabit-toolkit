@@ -1,6 +1,6 @@
 #! /bin/bash
 #---------------------------------------------------- Head info ---------------------------------------
-# author          : lei6.zhang (lei6.zhang@ly.com)
+# author          : blylei (blylei@163.com)
 # create datetime : 2022-05-24
 # funcation       : 基于rpm包一键安装官方版的MySQL
 # script name     : install_mysql_from_rpm.sh
@@ -396,7 +396,7 @@ run_cmd(){
   fi
   # 在不通过cmd命令时，默认为install
   if [ -z "$cmd" ] ; then
-    cmd="install"
+    cmd="help"
   fi
   case $cmd in
     "help") prompt_help ;;                 # 向控制台输出帮助信息
