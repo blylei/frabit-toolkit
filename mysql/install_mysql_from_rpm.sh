@@ -372,8 +372,8 @@ init_instance(){
 
 prompt_help() {
   echo "用法: install_mysql_from_rpm -c <cmd> -h major.minor.patch -m remote"
-  echo "举例: install_mysql_from_rpm -v 5.7.36 -m remote"
-  echo "举例: install_mysql_from_rpm -v 5.7.36"
+  echo "举例: install_mysql_from_rpm -v 5.7.36 -c install -m remote"
+  echo "举例: install_mysql_from_rpm -v 5.7.36 -c install"
   echo "选项:"
   echo "
   -H, --help                    输出帮助文档并退出脚本
